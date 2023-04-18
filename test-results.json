@@ -1,1 +1,86 @@
-{"numFailedTestSuites":0,"numFailedTests":0,"numPassedTestSuites":1,"numPassedTests":2,"numPendingTestSuites":0,"numPendingTests":0,"numRuntimeErrorTestSuites":0,"numTodoTests":0,"numTotalTestSuites":1,"numTotalTests":2,"openHandles":[],"snapshot":{"added":0,"didUpdate":false,"failure":false,"filesAdded":0,"filesRemoved":0,"filesRemovedList":[],"filesUnmatched":0,"filesUpdated":0,"matched":0,"total":0,"unchecked":0,"uncheckedKeysByFile":[],"unmatched":0,"updated":0},"startTime":1681716319950,"success":true,"testResults":[{"leaks":false,"numFailingTests":0,"numPassingTests":2,"numPendingTests":0,"numTodoTests":0,"openHandles":[],"perfStats":{"end":1681716325772,"runtime":5251,"slow":true,"start":1681716320521},"skipped":false,"snapshot":{"added":0,"fileDeleted":false,"matched":0,"unchecked":0,"uncheckedKeys":[],"unmatched":0,"updated":0},"testFilePath":"C:\\Users\\CawT\\Desktop\\playwright_testing\\tests\\mathutil\\mathUtil.test.ts","testResults":[{"ancestorTitles":["mathUtil","add"],"duration":1,"failureDetails":[],"failureMessages":[],"fullName":"mathUtil add [4] should add two numbers","invocations":1,"location":null,"numPassingAsserts":0,"status":"passed","title":"[4] should add two numbers"},{"ancestorTitles":["mathUtil","multiply"],"duration":0,"failureDetails":[],"failureMessages":[],"fullName":"mathUtil multiply should multiply two numbers","invocations":1,"location":null,"numPassingAsserts":0,"status":"passed","title":"should multiply two numbers"}],"failureMessage":null}],"wasInterrupted":false}
+{
+  "numFailedTestSuites": 0,
+  "numFailedTests": 0,
+  "numPassedTestSuites": 1,
+  "numPassedTests": 2,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 2,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1681802853230,
+  "success": true,
+  "testResults": [
+    {
+      "leaks": false,
+      "numFailingTests": 0,
+      "numPassingTests": 2,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "openHandles": [],
+      "perfStats": {
+        "end": 1681802856990,
+        "runtime": 3066,
+        "slow": false,
+        "start": 1681802853924
+      },
+      "skipped": false,
+      "snapshot": {
+        "added": 0,
+        "fileDeleted": false,
+        "matched": 0,
+        "unchecked": 0,
+        "uncheckedKeys": [],
+        "unmatched": 0,
+        "updated": 0
+      },
+      "testFilePath": "C:\\Users\\CawT\\Desktop\\playwright_testing\\tests\\mathutil\\mathUtil.test.ts",
+      "testResults": [
+        {
+          "ancestorTitles": ["mathUtil", "add"],
+          "duration": 1,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "mathUtil add [4] should add two numbers",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "status": "passed",
+          "title": "[4] should add two numbers"
+        },
+        {
+          "ancestorTitles": ["mathUtil", "multiply"],
+          "duration": 0,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "mathUtil multiply should multiply two numbers",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 0,
+          "status": "passed",
+          "title": "should multiply two numbers"
+        }
+      ],
+      "failureMessage": null
+    }
+  ],
+  "wasInterrupted": false
+}

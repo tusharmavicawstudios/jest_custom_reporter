@@ -137,7 +137,6 @@ axios.post(apiUrl, requestBody, {
       };
       testResultsArray.push(testResult);
     }
-
     // Publish the test results to the test run if it's still in progress
     const testRunDetails = await testApiObject.getTestRunById(project, testRun.id);
     if (testRunDetails.state === 'InProgress') {
@@ -148,11 +147,12 @@ axios.post(apiUrl, requestBody, {
         isAutomated: true,
         buildReference: { buildNumber: '1.0.0' },
       };
-      await testApiObject.addTestResultsToTestRun(
+      const runResult = await testApiObject.addTestResultsToTestRun(
         testResultsArray,
         project,
         testRun.id
       );
+      console.log(runResult);
       await testApiObject.updateTestRun(
         testRunUpdateModel,
         project,
