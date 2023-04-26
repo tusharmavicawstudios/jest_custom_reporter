@@ -14,8 +14,8 @@ describe('mathUtil', () => {
   });
 
   describe('multiply', () => {
-    it('should multiply two numbers', () => {
-      expect(multiply(2, 3)).toBe(6);
+    it(' [4] should multiply two numbers', () => {
+      expect(multiply(2, 3)).toBe(5);
     });
   });
 });

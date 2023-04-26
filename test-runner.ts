@@ -1,13 +1,18 @@
-import axios from 'axios';
 import * as azureDevOps from 'azure-devops-node-api';
 import * as Test from 'azure-devops-node-api/TestApi';
+import { TestPointsQuery } from 'azure-devops-node-api/interfaces/TestInterfaces';
 import * as fs from 'fs-extra';
 
-interface TestResultsToTestRun {
-  testResults: {
-    id: number;
-    testRunId: number;
-  }[];
+ function _getCaseIds(test: any): string[] {
+  const result: string[] = [];
+  const regex = new RegExp(/\[([\d,\s]+)\]/, 'gm');
+  const matchesAll = test.title.matchAll(regex);
+  const matches = [...matchesAll].map((match) => match[1]);
+  matches.forEach((match) => {
+    const ids = match.split(',').map((id: string) => id.trim());
+    result.push(...ids);
+  });
+  return result;
 }
 
 const _addReportingOverride = (api: Test.ITestApi): Test.ITestApi => {
@@ -57,25 +62,7 @@ export async function publishTestResults(): Promise<void> {
 
   const apiUrl = `${orgUrl}/${project}/_apis/test/points?api-version=7.0`;
 
-const requestBody = {
-  PointsFilter: {
-    TestcaseIds: [3,4]
-  },
-};
-
-axios.post(apiUrl, requestBody, {
-  headers: {
-    'Content-Type': 'application/json',
-    Authorization: `Basic ${Buffer.from(`:${pat}`).toString('base64')}`
-  }
-}).then((response) => {
-  console.log(response.data);
-}).catch((error) => {
-  console.log(error);
-});
-
   // Name for the test run and path to the Jest test results file
-  const testRunName = 'should multiply';
   const resultFilePath = 'test-results.json';
 
   // Create an authentication handler using the personal access token
@@ -84,7 +71,11 @@ axios.post(apiUrl, requestBody, {
   // Create a connection to the Azure DevOps organization
   const connection = new azureDevOps.WebApi(orgUrl, authHandler);
   const testRestApi = await connection.getTestApi();
+
+  // Read the contents of the Jest test results file as JSON
+  const testResults = await fs.readJson(resultFilePath);
   // const testPointsClient = await testRestApi.getTestPointsApi();
+  const testRunName = testResults.testResults[0].testResults[0].title;
 
   try {
     await (async function () {
@@ -104,9 +95,6 @@ axios.post(apiUrl, requestBody, {
         },
         project
       );
-
-      // Read the contents of the Jest test results file as JSON
-      const testResults = await fs.readJson(resultFilePath);
 
       // Upload the test results file as an attachment to the test run
       const attachmentRequest = {
@@ -128,12 +116,29 @@ axios.post(apiUrl, requestBody, {
 
       // Convert the test cases to the format expected by the Test Results API
       for (const testCase of testCases) {
+        const testcaseid = _getCaseIds(testCase);
+        console.log("these are test case id's: ", testcaseid)
+        let convertedIds = testcaseid.map(id => parseInt(id));
+        const pointsQuery: TestPointsQuery = {
+          pointsFilter: {
+            testcaseIds: convertedIds
+          },
+        };
+        const pointsQueryResult = await testApiObject.getPointsByQuery(
+          pointsQuery,
+          project
+        );
+
+        console.log('testpoints after storing', pointsQueryResult.points);
+
         const testResult = {
-        testPoint: {id: '1'},
+        //  testPoint: {id: testpoints},
         outcome: testCase.status === 'passed' ? 'Passed' : 'Failed',
         durationInMs: testCase.duration,
         state: 'Completed',
-        errorMessage: testCase.failureMessages?.[0],
+        errorMessage: testCase.failureMessages[0]
+        ? `${testCase.title}: ${testCase.failureMessages[0].replace(/\u001b\[.*?m/g, '') as string}`
+        : undefined,
       };
       testResultsArray.push(testResult);
     }
@@ -152,7 +157,7 @@ axios.post(apiUrl, requestBody, {
         project,
         testRun.id
       );
-      console.log(runResult);
+      // console.log(runResult);
       await testApiObject.updateTestRun(
         testRunUpdateModel,
         project,
