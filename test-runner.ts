@@ -1,9 +1,9 @@
 import * as azureDevOps from 'azure-devops-node-api';
 import * as Test from 'azure-devops-node-api/TestApi';
 import { TestPointsQuery } from 'azure-devops-node-api/interfaces/TestInterfaces';
-import * as fs from 'fs-extra';
+import { azureTest } from './azure.config';
 
- function _getCaseIds(test: any): string[] {
+ export function _getCaseIds(test: any): string[] {
   const result: string[] = [];
   const regex = new RegExp(/\[([\d,\s]+)\]/, 'gm');
   const matchesAll = test.title.matchAll(regex);
@@ -49,33 +49,23 @@ const _addReportingOverride = (api: Test.ITestApi): Test.ITestApi => {
   return api;
 };
 
-export async function publishTestResults(): Promise<void> {
+export async function publishTestResults(result: any): Promise<void> {
   // Azure DevOps organization URL and personal access token
-  const orgUrl = 'https://dev.azure.com/tusharmavi';
-  const pat = 'xbcbfossn4f42sffr4rn73efh4sc4u7pvdltv775sntnm7gfidga';
+  const orgUrl = azureTest.url;
+  const pat = azureTest.token;
 
   // Azure DevOps project and IDs for the test plan, test suite, and test case
-  const project = 'tusharmavi';
-  const testPlanId = '1';
-  const testSuiteId = 2;
-  const testCaseId = '4';
-
-  const apiUrl = `${orgUrl}/${project}/_apis/test/points?api-version=7.0`;
-
-  // Name for the test run and path to the Jest test results file
-  const resultFilePath = 'test-results.json';
+  const project = azureTest.projectname;
+  const testPlanId = azureTest.test_Plan_Id;
 
   // Create an authentication handler using the personal access token
   const authHandler = azureDevOps.getPersonalAccessTokenHandler(pat);
 
   // Create a connection to the Azure DevOps organization
   const connection = new azureDevOps.WebApi(orgUrl, authHandler);
-  const testRestApi = await connection.getTestApi();
 
-  // Read the contents of the Jest test results file as JSON
-  const testResults = await fs.readJson(resultFilePath);
-  // const testPointsClient = await testRestApi.getTestPointsApi();
-  const testRunName = testResults.testResults[0].testResults[0].title;
+  
+  const testRunName = result.testResults[0].testResults[0].ancestorTitles[0];
 
   try {
     await (async function () {
@@ -97,19 +87,19 @@ export async function publishTestResults(): Promise<void> {
       );
 
       // Upload the test results file as an attachment to the test run
-      const attachmentRequest = {
-        attachmentType: 'GeneralAttachment',
-        fileName: 'test-results.json',
-        stream: fs.readFileSync(resultFilePath, { encoding: 'base64' }),
-      };
-      await testApiObject.createTestRunAttachment(
-        attachmentRequest,
-        project,
-        testRun.id
-      );
+      // const attachmentRequest = {
+      //   attachmentType: 'GeneralAttachment',
+      //   fileName: 'test-results.json',
+      //   stream: fs.readFileSync(resultFilePath, { encoding: 'base64' }),
+      // };
+      // await testApiObject.createTestRunAttachment(
+      //   attachmentRequest,
+      //   project,
+      //   testRun.id
+      // );
 
       // Extract the test cases from the parsed JSON
-      const testCases = testResults.testResults[0].testResults;
+      const testCases = result.testResults[0].testResults;
 
       console.log(testCases);
       const testResultsArray = [];
@@ -118,7 +108,8 @@ export async function publishTestResults(): Promise<void> {
       for (const testCase of testCases) {
         const testcaseid = _getCaseIds(testCase);
         console.log("these are test case id's: ", testcaseid)
-        let convertedIds = testcaseid.map(id => parseInt(id));
+        const convertedIds =  testcaseid.map(id => parseInt(id));
+        console.log('converted answers: ',convertedIds);
         const pointsQuery: TestPointsQuery = {
           pointsFilter: {
             testcaseIds: convertedIds
@@ -131,16 +122,23 @@ export async function publishTestResults(): Promise<void> {
 
         console.log('testpoints after storing', pointsQueryResult.points);
 
-        const testResult = {
-        //  testPoint: {id: testpoints},
-        outcome: testCase.status === 'passed' ? 'Passed' : 'Failed',
-        durationInMs: testCase.duration,
-        state: 'Completed',
-        errorMessage: testCase.failureMessages[0]
-        ? `${testCase.title}: ${testCase.failureMessages[0].replace(/\u001b\[.*?m/g, '') as string}`
-        : undefined,
-      };
-      testResultsArray.push(testResult);
+        if (pointsQueryResult.points !== undefined) {
+          const tp = pointsQueryResult.points[0].id;
+          console.log(' this is testpoint id which i have got: ',tp);
+          const testpointsid: string=tp.toString();
+          const testResult = {
+            testPoint: {id: testpointsid},
+            outcome: testCase.status === 'passed' ? 'Passed' : 'Failed',
+            durationInMs: testCase.duration,
+            state: 'Completed',
+            errorMessage: testCase.failureMessages[0]
+              ? `${testCase.title}: ${testCase.failureMessages[0].replace(/\u001b\[.*?m/g, '') as string}`
+              : undefined,
+          };
+          testResultsArray.push(testResult);
+        } else {
+          console.log('No test points found for the given IDs.');
+        }
     }
     // Publish the test results to the test run if it's still in progress
     const testRunDetails = await testApiObject.getTestRunById(project, testRun.id);

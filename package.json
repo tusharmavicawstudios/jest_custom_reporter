@@ -28,7 +28,6 @@
     "transform": {
       "^.+\\.tsx?$": "ts-jest"
     },
-    "testResultsProcessor": "./node_modules/jest-json-reporter",
     "reporters": [
       [
         "<rootDir>/jest-reporter/index.js",
